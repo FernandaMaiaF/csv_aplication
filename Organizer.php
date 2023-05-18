@@ -21,29 +21,28 @@ function actionFindOcurrency($word)
   echo $ocurrency ?? 0;
 }
 
-function getFiles()
-{
-  $directory = 'organizations/';
-  $arrContent = glob($directory . "*");
-  return $arrContent;
-}
-
 function findWord($word)
 {
   $arrFiles = getFiles();
   $count = 0;
   foreach ($arrFiles as $fileName) {
-    $file = fopen($fileName, "r");
-    if ($file == false) {
+    $zip = new ZipArchive;
+    $zip->open($fileName, ZipArchive::RDONLY);
+    if ($zip == false) {
       var_dump("Error in opening file");
       exit();
     }
-    $filesize = filesize($fileName);
-    $filetext = fread($file, $filesize);
-    fclose($file);
-    $count += substr_count($filetext, $word);
-    // echo ( "<pre>$count</pre>");
+    $contentZip = $zip->getFromIndex(0);
+    $zip->close();
+    $count += substr_count($contentZip, $word);
   }
   return $count;
+}
+
+function getFiles()
+{
+  $directory = 'organizations/';
+  $arrContent = glob($directory . "*");
+  return $arrContent;
 }
 ?>
